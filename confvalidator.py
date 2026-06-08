@@ -38,18 +38,20 @@ def validate() -> dict[str: str]:
 
 def filldict() -> dict[str: int | str] | None:
     conf: dict[str: str]
-    new_dict: dict[str: str | int] = {}
     try:
         conf = validate()
         conf['WIDTH'] = int(conf["WIDTH"])
+        conf['HEIGHT'] = int(conf['HEIGHT'])
+        my_list: list[str | int] = conf['ENTRY'].split(',')
+        conf['ENTRY'] = int(my_list[0]), int(my_list[1])
+        my_list2: list[str | int] = conf['EXIT'].split(',')
+        conf['EXIT'] = int(my_list2[0]), int(my_list2[1])
+        conf['SEED'] = int(conf['SEED'])
+        conf['PERFECT'] = bool(conf['PERFECT'])
     except ValueError as e:
         print(e)
         exit()
     except OSError as e:
         print(e)
         exit()
-    print(conf)
     return conf
-
-
-print(filldict())
