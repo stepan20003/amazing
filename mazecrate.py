@@ -1,4 +1,5 @@
 from confvalidator import filldict
+import random
 
 
 def createmase():
@@ -35,20 +36,23 @@ def masewrite() -> None:
         print(e)
 
 
-masewrite()
-
-
 class GenMaze():
-    def __init__(self, maze: list[list[str]], entry: tuple[int, int], exit: tuple[int, int]):
+    def __init__(
+            self, maze: list[list[str]],
+            conf: dict[str: int | str | tuple]
+            ):
         self.maze = maze
-        self.entry = entry
-        self.exit = exit
-    
-    def mazeing(self):
-        valid: bool = True
-        x = 0
-        y = 0
-        
-    
+        self.up = 1
+        self.right = 2
+        self.down = 4
+        self.left = 8
+        self.visited = set()
+        self.stack: list[tuple[int, int]] = []
+        self.conf = conf
 
-        
+    def mazeing(self) -> None:
+        x, y = self.conf['ENTRY']
+        self.visited.add(self.conf['ENTRY'])
+        self.stack.append(self.conf['ENTRY'])
+        while self.stack:
+            x1, y1 = self.stack[-1]
