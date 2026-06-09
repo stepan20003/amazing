@@ -6,7 +6,7 @@ import random
 class MazeError(Exception):
     def __init__(self) -> None:
         m = "Error: Maze size too small to fit the '42'" \
-            "pattern. Minimum size is 9x5."
+            "pattern. Minimum size is 7x5."
         super().__init__(m)
 
 
@@ -26,11 +26,11 @@ class MazeGen:
         }
 
         self.PAT42 = [
-            [1, 0, 1, 0, 0, 1, 1, 1, 1],
-            [1, 0, 1, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 1, 0, 0, 1, 1, 1],
-            [0, 0, 1, 0, 0, 1, 0, 0, 0],
-            [0, 0, 1, 0, 0, 1, 1, 1, 1]
+                [1, 0, 0, 0, 1, 1, 1],
+                [1, 0, 0, 0, 0, 0, 1],
+                [1, 1, 1, 0, 1, 1, 1],
+                [0, 0, 1, 0, 1, 0, 0],
+                [0, 0, 1, 0, 1, 1, 1]
         ]
 
         self.width = conf["WIDTH"]
@@ -49,11 +49,11 @@ class MazeGen:
                      for _ in range(self.height)]
         self.stack.append(self.entry)
         self.visited.add(self.entry)
-        start_pat_x = (self.width - 9) // 2
+        start_pat_x = (self.width - 7) // 2
         start_pat_y = (self.height - 5) // 2
-        if self.width >= 9 and self.height >= 5:
+        if self.width >= 7 and self.height >= 5:
             for py in range(5):
-                for px in range(9):
+                for px in range(7):
                     if self.PAT42[py][px] == 1:
                         mazx = start_pat_x + px
                         mazy = start_pat_y + py
@@ -79,7 +79,7 @@ class MazeGen:
                 self.stack.pop()
         return self.grid
 
-
+maze = MazeGen(filldict())
 if __name__ == "__main__":
-    maze = MazeGen(filldict())
+    
     masewrite(maze.mazegen())

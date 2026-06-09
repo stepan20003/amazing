@@ -47,4 +47,4 @@ def generate_maze_iterative(width: int, height: int, seed: int = None):
     return grid
 
 
-masewrite(generate_maze_iterative(5, 5))
+masewrite(generate_maze_iterative(15, 20))
