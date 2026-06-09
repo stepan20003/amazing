@@ -14,8 +14,6 @@ def createmase():
 def masewrite(mase: list[str | int]) -> None:
     conf: dict[str: str] = filldict()
     outputf = conf["OUTPUT_FILE"]
-    x, y = conf["ENTRY"]
-    a, b = conf["EXIT"]
     try:
         with open(outputf, "w") as out:
             for i in mase:
@@ -24,7 +22,7 @@ def masewrite(mase: list[str | int]) -> None:
                 out.write('\n')
             for i in mase:
                 for j in i:
-                    print((hex(j).strip("0x")), end="")
+                    print(format(j, "x"), end="")
                 print()
     except OSError as e:
         print(e)

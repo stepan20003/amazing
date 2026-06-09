@@ -1,5 +1,5 @@
 import random
-from mazecrate import masewrite
+from writefile import masewrite
 
 
 NORTH = 1
@@ -9,7 +9,7 @@ WEST = 8
 
 
 DIRECTIONS = {
-    NORTH: (0, -1, SOUTH),
+    NORTH: (-1, 0, SOUTH),
     EAST:  (1, 0, WEST),
     SOUTH: (0, 1, NORTH),
     WEST:  (-1, 0, EAST)
@@ -47,8 +47,4 @@ def generate_maze_iterative(width: int, height: int, seed: int = None):
     return grid
 
 
-masewrite(generate_maze_iterative(20, 20))
-grid = generate_maze_iterative(25, 25)
-
-print("Տողերի քանակը (Բարձրություն):", len(grid)) # Պետք է տպի 5
-print("Առաջին տողի բջիջների քանակը (Լայնություն):", len(grid[0])) # Պետք է տպի 25
+masewrite(generate_maze_iterative(5, 5))

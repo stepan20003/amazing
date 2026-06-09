@@ -13,4 +13,4 @@ PERFECT=True
 
 
 # Optional: Seed for reproducibility
-SEED=12345
+SEED=None

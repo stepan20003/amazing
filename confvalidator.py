@@ -36,7 +36,7 @@ def validate() -> dict[str: str]:
         raise ValueError(e)
 
 
-def filldict() -> dict[str: int | str] | None:
+def filldict() -> dict[str: int | str | None] | None:
     conf: dict[str: str]
     try:
         conf = validate()
@@ -46,8 +46,11 @@ def filldict() -> dict[str: int | str] | None:
         conf['ENTRY'] = int(my_list[0]), int(my_list[1])
         my_list2: list[str | int] = str(conf['EXIT']).split(',')
         conf['EXIT'] = int(my_list2[0]), int(my_list2[1])
-        conf['SEED'] = int(conf['SEED'])
         conf['PERFECT'] = bool(conf['PERFECT'])
+        if conf['SEED'] in "None":
+            conf['SEED'] = None
+        else:
+            conf['SEED'] = int(conf['SEED'])
     except ValueError as e:
         print(e)
         exit()
