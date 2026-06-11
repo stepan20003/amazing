@@ -1,5 +1,5 @@
 from collections import deque
-from mazemaze import filldict, maze
+from confvalidator import filldict
 
 
 NORTH = 1
@@ -8,10 +8,10 @@ SOUTH = 4
 WEST = 8
 
 MOVES = {
-    NORTH: (-1, 0),
-    EAST:  (0, 1),
-    SOUTH: (1, 0),
-    WEST:  (0, -1)
+    NORTH: (0, -1),
+    EAST:  (1, 0),
+    SOUTH: (0, 1),
+    WEST:  (-1, 0)
 }
 
 
@@ -70,13 +70,13 @@ def path_to_dirs(path):
         dy = y2 - y1
 
         if dx == -1 and dy == 0:
-            dirs.append("N")
-        elif dx == 1 and dy == 0:
-            dirs.append("S")
-        elif dx == 0 and dy == 1:
-            dirs.append("E")
-        elif dx == 0 and dy == -1:
             dirs.append("W")
+        elif dx == 1 and dy == 0:
+            dirs.append("E")
+        elif dx == 0 and dy == 1:
+            dirs.append("S")
+        elif dx == 0 and dy == -1:
+            dirs.append("N")
 
     return dirs
 
@@ -85,8 +85,10 @@ def solving():
     with open("maze.txt", "r") as f:
         path = f.read()
         path = path.split("\n")
-        for i in path:
-            result = [int(c, 16) for c in i]
-    print(result)
+        result = [[int(c, 16) for c in i] for i in path]
+    conf = filldict()
+
+    x = solve_maze(result, conf["ENTRY"], conf["EXIT"])
+    print(*path_to_dirs(x))
 
 solving()
