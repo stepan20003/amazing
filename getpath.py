@@ -1,6 +1,7 @@
 from collections import deque
 from mazemaze import filldict, maze
 
+
 NORTH = 1
 EAST = 2
 SOUTH = 4
@@ -57,6 +58,7 @@ def solve_maze(grid, start, end):
 
     return path
 
+
 def path_to_dirs(path):
     dirs = []
 
@@ -80,9 +82,11 @@ def path_to_dirs(path):
 
 
 def solving():
-    canv = filldict()
-    path = solve_maze(maze.mazegen(), canv["ENTRY"], canv["EXIT"])
-    print(*path_to_dirs(path))
-
+    with open("maze.txt", "r") as f:
+        path = f.read()
+        path = path.split("\n")
+        for i in path:
+            result = [int(c, 16) for c in i]
+    print(result)
 
 solving()

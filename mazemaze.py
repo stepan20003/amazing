@@ -19,10 +19,10 @@ class MazeGen:
         self.WEST = 8
 
         self.MOVES: dict[int: tuple[int, int, int]] = {
-            self.NORTH: (-1, 0, self.SOUTH),
-            self.EAST: (0, 1, self.WEST),
-            self.SOUTH: (1, 0, self.NORTH),
-            self.WEST: (0, -1, self.EAST)
+            self.NORTH: (0, -1, self.SOUTH),
+            self.EAST: (1, 0, self.WEST),
+            self.SOUTH: (0, 1, self.NORTH),
+            self.WEST: (-1, 0, self.EAST)
         }
 
         self.PAT42 = [
@@ -58,9 +58,10 @@ class MazeGen:
                         mazx = start_pat_x + px
                         mazy = start_pat_y + py
                         self.visited.add((mazx, mazy))
+
         else:
             raise MazeError
-
+        print(self.stack)
         while self.stack:
             cx, cy = self.stack[-1]
             unvis_neighbors = []
@@ -79,7 +80,7 @@ class MazeGen:
                 self.stack.pop()
         return self.grid
 
-maze = MazeGen(filldict())
+
 if __name__ == "__main__":
-    
+    maze = MazeGen(filldict())
     masewrite(maze.mazegen())
