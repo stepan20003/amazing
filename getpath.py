@@ -1,94 +1,45 @@
 from collections import deque
-from confvalidator import filldict
+from mazemaze import MazeGen, MazeError
+from typing import Any
 
 
-NORTH = 1
-EAST = 2
-SOUTH = 4
-WEST = 8
+class PathFinder(MazeGen):
+    def __init__(self, conf: dict[Any, Any]):
+        super().__init__(conf)
 
-MOVES = {
-    NORTH: (0, -1),
-    EAST:  (1, 0),
-    SOUTH: (0, 1),
-    WEST:  (-1, 0)
-}
+    def find_short_path(self):
+        maze = super().mazegen()
+        entry_room = (self.entry[1], self.entry[0])
+        exit_room = (self.exit[1], self.exit[0])
+        queue: deque[tuple[int, int]] = deque([entry_room])
+        visited: set[tuple[int, int]] = {entry_room}
+        ptogo: dict[
+            tuple[int, int], tuple[int, int] | None] = {entry_room: None}
+        direct = [
+            (-1, 0, 1),
+            (0, 1, 2),
+            (1, 0, 4),
+            (0, -1, 8)
+        ]
+        while queue:
+            cur_r, cur_c = queue.popleft()
+            if (cur_r, cur_c) == exit_room:
+                path: list[tuple[int, int]] = []
+                curr = exit_room
+                while curr is not None:
+                    path.append((curr[1], curr[0]))
+                    curr = ptogo[curr]
+                return path[::-1]
 
-
-def solve_maze(grid, start, end):
-    h = len(grid)
-    w = len(grid[0])
-
-    queue = deque([start])
-    visited = set([start])
-
-    parent = {}
-
-    while queue:
-        x, y = queue.popleft()
-
-        if (x, y) == end:
-            break
-
-        cell = grid[y][x]
-
-        for direction, (dx, dy) in MOVES.items():
-
-            if not (cell & direction):
-                nx, ny = x + dx, y + dy
-
-                if 0 <= nx < w and 0 <= ny < h:
-                    if (nx, ny) not in visited:
-                        visited.add((nx, ny))
-                        queue.append((nx, ny))
-                        parent[(nx, ny)] = (x, y)
-
-    if end not in parent and start != end:
-        return None
-
-    path = []
-    cur = end
-
-    while cur != start:
-        path.append(cur)
-        cur = parent[cur]
-
-    path.append(start)
-    path.reverse()
-
-    return path
-
-
-def path_to_dirs(path):
-    dirs = []
-
-    for i in range(1, len(path)):
-        x1, y1 = path[i-1]
-        x2, y2 = path[i]
-
-        dx = x2 - x1
-        dy = y2 - y1
-
-        if dx == -1 and dy == 0:
-            dirs.append("W")
-        elif dx == 1 and dy == 0:
-            dirs.append("E")
-        elif dx == 0 and dy == 1:
-            dirs.append("S")
-        elif dx == 0 and dy == -1:
-            dirs.append("N")
-
-    return dirs
-
-
-def solving():
-    with open("maze.txt", "r") as f:
-        path = f.read()
-        path = path.split("\n")
-        result = [[int(c, 16) for c in i] for i in path]
-    conf = filldict()
-
-    x = solve_maze(result, conf["ENTRY"], conf["EXIT"])
-    print(*path_to_dirs(x))
-
-solving()
+            raw_cell = maze[cur_r][cur_c]
+            curr_cell = int(
+                raw_cell, 16) if isinstance(raw_cell, str) else raw_cell
+            for dx, dy, mask in direct:
+                nr, nc = cur_r + dx, cur_c + dy
+                if 0 <= nr < self.height and 0 <= nc < self.width:
+                    if (curr_cell & mask) == 0:
+                        if (nr, nc) not in visited:
+                            visited.add((nr, nc))
+                            ptogo[(nr, nc)] = (cur_r, cur_c)
+                            queue.append((nr, nc))
+        raise MazeError("Error: Path is not found")

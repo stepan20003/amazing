@@ -1,31 +1,29 @@
-from writefile import masewrite
-from confvalidator import filldict
 import random
+from typing import Any
 
 
 class MazeError(Exception):
-    def __init__(self) -> None:
-        m = "Error: Maze size too small to fit the '42'" \
-            "pattern. Minimum size is 7x5."
+    def __init__(self, m="Error: Maze size too small to fit the '42'"
+                         "pattern. Minimum size is 7x5.") -> None:
         super().__init__(m)
 
 
 class MazeGen:
     def __init__(
-            self, conf: dict[str: str | int | None | tuple[int, int]]) -> None:
+            self, conf: dict[Any, Any]) -> None:
         self.NORTH = 1
         self.EAST = 2
         self.SOUTH = 4
         self.WEST = 8
 
-        self.MOVES: dict[int: tuple[int, int, int]] = {
+        self.MOVES: dict[int, tuple[int, int, int]] = {
             self.NORTH: (0, -1, self.SOUTH),
             self.EAST: (1, 0, self.WEST),
             self.SOUTH: (0, 1, self.NORTH),
             self.WEST: (-1, 0, self.EAST)
         }
 
-        self.PAT42 = [
+        self.PAT42: list[list[int]] = [
                 [1, 0, 0, 0, 1, 1, 1],
                 [1, 0, 0, 0, 0, 0, 1],
                 [1, 1, 1, 0, 1, 1, 1],
@@ -38,7 +36,7 @@ class MazeGen:
         self.entry = conf["ENTRY"]
         self.exit = conf["EXIT"]
         self.seed = conf["SEED"]
-        self.stack: list[int] = []
+        self.stack: list[tuple[int, int]] = []
         self.visited = set()
 
     def mazegen(self) -> list[list[int]]:
@@ -47,6 +45,8 @@ class MazeGen:
 
         self.grid = [[15 for _ in range(self.width)]
                      for _ in range(self.height)]
+        self.stack = []
+        self.visited = set()
         self.stack.append(self.entry)
         self.visited.add(self.entry)
         start_pat_x = (self.width - 7) // 2
@@ -58,10 +58,8 @@ class MazeGen:
                         mazx = start_pat_x + px
                         mazy = start_pat_y + py
                         self.visited.add((mazx, mazy))
-
         else:
             raise MazeError
-        print(self.stack)
         while self.stack:
             cx, cy = self.stack[-1]
             unvis_neighbors = []
@@ -79,8 +77,3 @@ class MazeGen:
             else:
                 self.stack.pop()
         return self.grid
-
-
-if __name__ == "__main__":
-    maze = MazeGen(filldict())
-    masewrite(maze.mazegen())

@@ -1,13 +1,13 @@
 import invenvcheck as inv
-from sys import exit
+from sys import exit, stderr
 
 
 __all__ = ["inv"]
 
 
-def validate() -> dict[str: str]:
+def validate() -> dict[str, str]:
     text: list[str] = []
-    my_dcit: dict[str: str] = {}
+    my_dcit: dict[str, str] = {}
     valid_cases: list[str] = ['WIDTH',
                               'HEIGHT',
                               'ENTRY',
@@ -36,25 +36,27 @@ def validate() -> dict[str: str]:
         raise ValueError(e)
 
 
-def filldict() -> dict[str: int | str | None] | None:
-    conf: dict[str: str]
+def filldict() -> dict[str, int | str | None | tuple[int, int]]:
+    conf: dict[str, str] = {}
+    confer: dict[str, int | str | None | tuple[int, int]] = {}
     try:
         conf = validate()
-        conf['WIDTH'] = int(conf["WIDTH"])
-        conf['HEIGHT'] = int(conf['HEIGHT'])
-        my_list: list[str | int] = str(conf['ENTRY']).split(',')
-        conf['ENTRY'] = int(my_list[0]), int(my_list[1])
-        my_list2: list[str | int] = str(conf['EXIT']).split(',')
-        conf['EXIT'] = int(my_list2[0]), int(my_list2[1])
-        conf['PERFECT'] = bool(conf['PERFECT'])
+        confer['WIDTH'] = int(conf["WIDTH"])
+        confer['HEIGHT'] = int(conf['HEIGHT'])
+        my_list: list[str] = str(conf['ENTRY']).split(',')
+        confer['ENTRY'] = int(my_list[0]), int(my_list[1])
+        my_list2: list[str] = str(conf['EXIT']).split(',')
+        confer['EXIT'] = int(my_list2[0]), int(my_list2[1])
+        confer['PERFECT'] = bool(conf['PERFECT'])
         if conf['SEED'] in "None":
-            conf['SEED'] = None
+            confer['SEED'] = None
         else:
-            conf['SEED'] = int(conf['SEED'])
+            confer['SEED'] = int(conf['SEED'])
+        confer["OUTPUT_FILE"] = conf["OUTPUT_FILE"]
     except ValueError as e:
-        print(e)
+        print(e, file=stderr)
         exit()
     except OSError as e:
-        print(e)
+        print(e, file=stderr)
         exit()
-    return conf
+    return confer
