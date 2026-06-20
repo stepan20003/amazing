@@ -19,16 +19,15 @@ def validate() -> dict[str, str]:
     with open("config.txt", "r") as config:
         text = [x for x in config.read().split("\n")]
     try:
-        for i in text[:]:
+        for i in text:
             if i.startswith('#') or not i:
-                text.remove(i)
                 continue
             if "=" not in i:
                 raise ValueError("Invalid Config: Key and"
                                  " Value must seperated with '='")
             k = i.split("=")
             my_dcit.update({k[0].strip(): (k[1].strip())})
-        if not list(my_dcit.keys()) == valid_cases:
+        if set(my_dcit.keys()) != set(valid_cases):
             raise ValueError("Invalid Config: Config must "
                              "be have all valid keys")
         return my_dcit
@@ -47,11 +46,11 @@ def filldict() -> dict[str, int | str | None | tuple[int, int]]:
         confer['ENTRY'] = int(my_list[0]), int(my_list[1])
         my_list2: list[str] = str(conf['EXIT']).split(',')
         confer['EXIT'] = int(my_list2[0]), int(my_list2[1])
-        confer['PERFECT'] = bool(conf['PERFECT'])
-        if conf['SEED'] in "None":
-            confer['SEED'] = None
+        confer["PERFECT"] = conf["PERFECT"].strip().lower() == "true"
+        if conf["SEED"] == "None":
+            confer["SEED"] = None
         else:
-            confer['SEED'] = int(conf['SEED'])
+            confer["SEED"] = int(conf["SEED"])
         confer["OUTPUT_FILE"] = conf["OUTPUT_FILE"]
     except ValueError as e:
         print(e, file=stderr)

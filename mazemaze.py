@@ -47,6 +47,7 @@ class MazeGen:
                      for _ in range(self.height)]
         self.stack = []
         self.visited = set()
+        self.blocked: set[tuple[int, int]] = set()
         self.stack.append(self.entry)
         self.visited.add(self.entry)
         start_pat_x = (self.width - 7) // 2
@@ -54,10 +55,15 @@ class MazeGen:
         if self.width >= 7 and self.height >= 5:
             for py in range(5):
                 for px in range(7):
+                    mx = start_pat_x + px
+                    my = start_pat_y + py
                     if self.PAT42[py][px] == 1:
-                        mazx = start_pat_x + px
-                        mazy = start_pat_y + py
-                        self.visited.add((mazx, mazy))
+                        self.grid[my][mx] = 15
+                        self.blocked.add((mx, my))
+                        self.visited.add((mx, my))
+                    else:
+                        self.grid[my][mx] = 0
+                        self.blocked.add((mx, my))
         else:
             raise MazeError
         while self.stack:
@@ -66,7 +72,8 @@ class MazeGen:
             for move_to, (mx, my, br_wall) in self.MOVES.items():
                 nx, ny = cx + mx, cy + my
                 if (0 <= nx < self.width and 0 <= ny < self.height and
-                   (nx, ny) not in self.visited):
+                   (nx, ny) not in self.visited and
+                   (nx, ny) not in self.blocked):
                     unvis_neighbors.append((nx, ny, move_to, br_wall))
             if unvis_neighbors:
                 nx, ny, move_to, br_wall = random.choice(unvis_neighbors)

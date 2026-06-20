@@ -5,7 +5,7 @@ HEIGHT=13
 
 # Entry and Exit points
 ENTRY=0,0
-EXIT=0,12
+EXIT=10,0
 
 # Output settings
 OUTPUT_FILE=maze.txt
