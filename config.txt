@@ -1,11 +1,11 @@
 # Configuration file for A-Maze-ing project
 # Maze dimensions
-WIDTH=15
-HEIGHT=13
+WIDTH=100
+HEIGHT=100
 
 # Entry and Exit points
 ENTRY=0,0
-EXIT=0,12
+EXIT=1,2
 
 # Output settings
 OUTPUT_FILE=maze.txt

@@ -36,19 +36,15 @@ class MazeGen:
         self.entry = conf["ENTRY"]
         self.exit = conf["EXIT"]
         self.seed = conf["SEED"]
-        self.stack: list[tuple[int, int]] = []
-        self.visited = set()
 
     def mazegen(self) -> list[list[int]]:
+        """Gen maze and open doors"""
+        stack: list[tuple[int, int]] = []
         if self.seed is not None:
             random.seed(self.seed)
 
-        self.grid = [[15 for _ in range(self.width)]
-                     for _ in range(self.height)]
-        self.stack = []
-        self.visited = set()
-        self.stack.append(self.entry)
-        self.visited.add(self.entry)
+        grid = [[15 for _ in range(self.width)] for _ in range(self.height)]
+        visited = set()
         start_pat_x = (self.width - 7) // 2
         start_pat_y = (self.height - 5) // 2
         if self.width >= 7 and self.height >= 5:
@@ -57,23 +53,28 @@ class MazeGen:
                     if self.PAT42[py][px] == 1:
                         mazx = start_pat_x + px
                         mazy = start_pat_y + py
-                        self.visited.add((mazx, mazy))
+                        visited.add((mazx, mazy))
         else:
-            raise MazeError
-        while self.stack:
-            cx, cy = self.stack[-1]
+            print("Maze size too small to fit the '42'", end=" ")
+            print("pattern. Minimum size for patern is 7x5.")
+        if self.entry in list(visited) or self.exit in list(visited):
+            raise MazeError("Entry or Exit points in 42 patern")
+        stack.append(self.entry)
+        visited.add(self.entry)
+        while stack:
+            cx, cy = stack[-1]
             unvis_neighbors = []
             for move_to, (mx, my, br_wall) in self.MOVES.items():
                 nx, ny = cx + mx, cy + my
                 if (0 <= nx < self.width and 0 <= ny < self.height and
-                   (nx, ny) not in self.visited):
+                   (nx, ny) not in visited):
                     unvis_neighbors.append((nx, ny, move_to, br_wall))
             if unvis_neighbors:
                 nx, ny, move_to, br_wall = random.choice(unvis_neighbors)
-                self.grid[cy][cx] &= ~move_to
-                self.grid[ny][nx] &= ~br_wall
-                self.visited.add((nx, ny))
-                self.stack.append((nx, ny))
+                grid[cy][cx] &= ~move_to
+                grid[ny][nx] &= ~br_wall
+                visited.add((nx, ny))
+                stack.append((nx, ny))
             else:
-                self.stack.pop()
-        return self.grid
+                stack.pop()
+        return grid

@@ -1,18 +1,20 @@
-from getpath import PathFinder, MazeError
+from getpath import MazeError
+from drowmaze import DrowMaze
 from writefile import mazewrite
 from confvalidator import filldict
 from sys import stderr, exit
 
 
 def main() -> None:
-    full_maze: list[list[int]]
     try:
-        maze = PathFinder(filldict())
-        full_maze = maze.mazegen()
-        mazewrite(full_maze, maze.find_short_path())
+        drow = DrowMaze(filldict())
+        mazewrite(drow.maze, drow.road)
+        drow.visual()
     except MazeError as e:
         print(e, file=stderr)
         exit()
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":

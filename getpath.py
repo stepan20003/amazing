@@ -6,9 +6,9 @@ from typing import Any
 class PathFinder(MazeGen):
     def __init__(self, conf: dict[Any, Any]):
         super().__init__(conf)
+        self.maze = super().mazegen()
 
     def find_short_path(self):
-        maze = super().mazegen()
         entry_room = (self.entry[1], self.entry[0])
         exit_room = (self.exit[1], self.exit[0])
         queue: deque[tuple[int, int]] = deque([entry_room])
@@ -31,7 +31,7 @@ class PathFinder(MazeGen):
                     curr = ptogo[curr]
                 return path[::-1]
 
-            raw_cell = maze[cur_r][cur_c]
+            raw_cell = self.maze[cur_r][cur_c]
             curr_cell = int(
                 raw_cell, 16) if isinstance(raw_cell, str) else raw_cell
             for dx, dy, mask in direct:
