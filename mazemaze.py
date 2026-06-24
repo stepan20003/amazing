@@ -1,11 +1,16 @@
 import random
+import sys
 from typing import Any
-import time
 
 
 class MazeError(Exception):
-    def __init__(self, m: str = "Error: Maze size too small to fit the '42'"
-                         "pattern. Minimum size is 7x5.") -> None:
+    def __init__(
+        self,
+        m: str = (
+            "Error: Maze size too small to fit the '42' "
+            "pattern. Minimum size is 7x5."
+        ),
+    ) -> None:
         super().__init__(m)
 
 
@@ -39,17 +44,17 @@ class MazeGen:
         self.exit = conf["EXIT"]
         self.seed = conf["SEED"]
 
+    def start_animation(self) -> None:
+        pass
+
     def draw_animation_frame(self, delay: float = 0.03) -> None:
-        if hasattr(self, 'build_terminal_map'):
-            print("\033[H", end="")
-            print(self.build_terminal_map(show_path=False))
-            time.sleep(delay)
+        pass
 
     def mazegen(self) -> list[list[int]]:
         stack: list[tuple[int, int]] = []
-        animate = 1
+        animate = sys.stdout.isatty()
         if animate:
-            print("\033[2J", end="")
+            self.start_animation()
         if self.seed is not None:
             random.seed(self.seed)
         grid = [[15 for _ in range(self.width)] for _ in range(self.height)]
@@ -112,7 +117,6 @@ class MazeGen:
                     nx, ny, move_to, br_wall = random.choice(valid_moves)
                     grid[cy][cx] &= ~move_to
                     grid[ny][nx] &= ~br_wall
-
                     if animate:
                         self.draw_animation_frame()
         return grid

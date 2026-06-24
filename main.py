@@ -1,4 +1,5 @@
-from getpath import MazeError
+import sys
+from mazemaze import MazeError
 from drowed import DrowMaze
 from writefile import mazewrite
 from confvalidator import filldict
@@ -10,7 +11,8 @@ def main() -> None:
         conf = filldict()
         drow = DrowMaze(conf)
         mazewrite(drow.maze, drow.road, conf)
-        print(drow.build_terminal_map())
+        if not sys.stdout.isatty():
+            print(drow.build_terminal_map())
     except MazeError as e:
         print(e, file=stderr)
         exit(1)

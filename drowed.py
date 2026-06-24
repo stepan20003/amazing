@@ -1,6 +1,24 @@
+import sys
+import time
 from typing import Any
 
 from getpath import PathFinder
+
+
+def _enable_terminal_vt() -> None:
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        enable_vt = 0x0004
+        for handle_id in (-11, -12):
+            handle = kernel32.GetStdHandle(handle_id)
+            mode = ctypes.c_uint32()
+            if kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+                kernel32.SetConsoleMode(handle, mode.value | enable_vt)
+    except (AttributeError, OSError):
+        pass
 
 
 class DrowMaze(PathFinder):
@@ -17,8 +35,60 @@ class DrowMaze(PathFinder):
              "\033[41m  \033[0m", "\033[100m  \033[0m", "\033[34m██\033[0m")
         ]
         self.color_index = 2
+        self.animate = sys.stdout.isatty()
+        self._frame_line_count = 0
+        if self.animate:
+            _enable_terminal_vt()
         super().__init__(conf)
         self.road = self.find_short_path()
+        if self.animate:
+            self.finish_animation(self.build_terminal_map(show_path=True))
+
+    def find_short_path(self) -> list[tuple[int, int]]:
+        path = super().find_short_path()
+        if not self.animate:
+            return path
+        self.road = []
+        for step in range(1, len(path) + 1):
+            self.road = path[:step]
+            self.draw_path_frame()
+        return path
+
+    def _refresh_terminal(self, content: str, *, clear_screen: bool = False) -> None:
+        if not self.animate:
+            return
+        if clear_screen:
+            sys.stdout.write("\033[2J\033[H")
+        lines = content.split("\n") if content else []
+        for row, line in enumerate(lines, start=1):
+            sys.stdout.write(f"\033[{row};1H\033[2K{line}")
+        for row in range(len(lines) + 1, self._frame_line_count + 1):
+            sys.stdout.write(f"\033[{row};1H\033[2K")
+        self._frame_line_count = len(lines)
+        sys.stdout.flush()
+
+    def start_animation(self) -> None:
+        if not self.animate:
+            return
+        sys.stdout.write("\033[?1049h\033[?25l\033[2J\033[H")
+        sys.stdout.flush()
+        self._frame_line_count = 0
+
+    def finish_animation(self, content: str) -> None:
+        if not self.animate:
+            return
+        sys.stdout.write("\033[?1049l\033[?25h")
+        sys.stdout.flush()
+        self._frame_line_count = 0
+        self._refresh_terminal(content, clear_screen=True)
+
+    def draw_animation_frame(self, delay: float = 0.03) -> None:
+        self._refresh_terminal(self.build_terminal_map(show_path=False))
+        time.sleep(delay)
+
+    def draw_path_frame(self, delay: float = 0.06) -> None:
+        self._refresh_terminal(self.build_terminal_map(show_path=True))
+        time.sleep(delay)
 
     def rotate_colors(self) -> None:
         self.color_index = (self.color_index + 1) % len(self.colors)
@@ -31,7 +101,7 @@ class DrowMaze(PathFinder):
 
         term_height = h * 3
         term_width = w * 3
-        term_map = [["█" for _ in range(term_width)]
+        term_map = [["#" for _ in range(term_width)]
                     for _ in range(term_height)]
         (WALL_COLOR,
          BLUE,
@@ -44,12 +114,11 @@ class DrowMaze(PathFinder):
             for x in range(w):
                 val = grid[y][x]
                 cx, cy = x * 3 + 1, y * 3 + 1
-                is_42 = hasattr(self,
-                                'pattern_42') and (x, y) in self.pattern_42
+                is_42 = (x, y) in self.pattern_42
                 if is_42:
                     for dy in [-1, 0, 1]:
                         for dx in [-1, 0, 1]:
-                            term_map[cy+dy][cx+dx] = "▓"
+                            term_map[cy+dy][cx+dx] = "+"
                 if (x, y) == self.entry:
                     center_char = GREEN
                 elif (x, y) == self.exit:
@@ -89,9 +158,9 @@ class DrowMaze(PathFinder):
         for row in term_map:
             line_chars = []
             for char in row:
-                if char == "█":
+                if char == "#":
                     line_chars.append(WALL_COLOR)
-                elif char == "▓":
+                elif char == "+":
                     line_chars.append(WALL_42_COLOR)
                 else:
                     line_chars.append(char)

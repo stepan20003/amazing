@@ -37,12 +37,28 @@ def filldict() -> dict[str, int | str | None | tuple[int, int] | bool]:
     confer: dict[str, int | str | None | tuple[int, int] | bool] = {}
     try:
         conf = validate()
-        confer['WIDTH'] = int(conf["WIDTH"])
-        confer['HEIGHT'] = int(conf['HEIGHT'])
+        width = int(conf["WIDTH"])
+        height = int(conf['HEIGHT'])
+        if width < 1 or height < 1:
+            raise ValueError(
+                "Invalid Config: WIDTH and HEIGHT must be positive"
+            )
+        confer['WIDTH'] = width
+        confer['HEIGHT'] = height
         my_list: list[str] = str(conf['ENTRY']).split(',')
-        confer['ENTRY'] = int(my_list[0]), int(my_list[1])
+        entry = (int(my_list[0]), int(my_list[1]))
         my_list2: list[str] = str(conf['EXIT']).split(',')
-        confer['EXIT'] = int(my_list2[0]), int(my_list2[1])
+        exit_point = (int(my_list2[0]), int(my_list2[1]))
+        if entry == exit_point:
+            raise ValueError("Invalid Config: ENTRY and EXIT must differ")
+        for name, point in (('ENTRY', entry), ('EXIT', exit_point)):
+            x, y = point
+            if not (0 <= x < width and 0 <= y < height):
+                raise ValueError(
+                    f"Invalid Config: {name} ({x},{y}) is out of bounds"
+                )
+        confer['ENTRY'] = entry
+        confer['EXIT'] = exit_point
         if conf['PERFECT'] == 'True':
             confer['PERFECT'] = True
         elif conf['PERFECT'] == 'False':

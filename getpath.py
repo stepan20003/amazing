@@ -4,7 +4,7 @@ from typing import Any
 
 
 class PathFinder(MazeGen):
-    def __init__(self, conf: dict[Any, Any]):
+    def __init__(self, conf: dict[Any, Any]) -> None:
         super().__init__(conf)
         self.maze = super().mazegen()
 
