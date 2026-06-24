@@ -8,7 +8,7 @@ class PathFinder(MazeGen):
         super().__init__(conf)
         self.maze = super().mazegen()
 
-    def find_short_path(self):
+    def find_short_path(self) -> list[tuple[int, int]]:
         entry_room = (self.entry[1], self.entry[0])
         exit_room = (self.exit[1], self.exit[0])
         queue: deque[tuple[int, int]] = deque([entry_room])
@@ -25,7 +25,7 @@ class PathFinder(MazeGen):
             cur_r, cur_c = queue.popleft()
             if (cur_r, cur_c) == exit_room:
                 path: list[tuple[int, int]] = []
-                curr = exit_room
+                curr: tuple[int, int] | None = exit_room
                 while curr is not None:
                     path.append((curr[1], curr[0]))
                     curr = ptogo[curr]

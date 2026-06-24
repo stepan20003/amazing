@@ -1,9 +1,10 @@
 import random
 from typing import Any
+import time
 
 
 class MazeError(Exception):
-    def __init__(self, m="Error: Maze size too small to fit the '42'"
+    def __init__(self, m: str = "Error: Maze size too small to fit the '42'"
                          "pattern. Minimum size is 7x5.") -> None:
         super().__init__(m)
 
@@ -11,6 +12,7 @@ class MazeError(Exception):
 class MazeGen:
     def __init__(
             self, conf: dict[Any, Any]) -> None:
+        self.conf = conf
         self.NORTH = 1
         self.EAST = 2
         self.SOUTH = 4
@@ -37,14 +39,23 @@ class MazeGen:
         self.exit = conf["EXIT"]
         self.seed = conf["SEED"]
 
+    def draw_animation_frame(self, delay: float = 0.03) -> None:
+        if hasattr(self, 'build_terminal_map'):
+            print("\033[H", end="")
+            print(self.build_terminal_map(show_path=False))
+            time.sleep(delay)
+
     def mazegen(self) -> list[list[int]]:
-        """Gen maze and open doors"""
         stack: list[tuple[int, int]] = []
+        animate = 1
+        if animate:
+            print("\033[2J", end="")
         if self.seed is not None:
             random.seed(self.seed)
-
         grid = [[15 for _ in range(self.width)] for _ in range(self.height)]
+        self.maze = grid
         visited = set()
+        self.pattern_42 = set()
         start_pat_x = (self.width - 7) // 2
         start_pat_y = (self.height - 5) // 2
         if self.width >= 7 and self.height >= 5:
@@ -54,9 +65,9 @@ class MazeGen:
                         mazx = start_pat_x + px
                         mazy = start_pat_y + py
                         visited.add((mazx, mazy))
+                        self.pattern_42.add((mazx, mazy))
         else:
-            print("Maze size too small to fit the '42'", end=" ")
-            print("pattern. Minimum size for patern is 7x5.")
+            raise MazeError()
         if self.entry in list(visited) or self.exit in list(visited):
             raise MazeError("Entry or Exit points in 42 patern")
         stack.append(self.entry)
@@ -75,6 +86,33 @@ class MazeGen:
                 grid[ny][nx] &= ~br_wall
                 visited.add((nx, ny))
                 stack.append((nx, ny))
+                if animate:
+                    self.draw_animation_frame()
             else:
                 stack.pop()
+
+        if not self.conf['PERFECT']:
+            dead_ends = []
+            for cy in range(1, self.height - 1):
+                for cx in range(1, self.width - 1):
+                    if (cx, cy) in self.pattern_42:
+                        continue
+                    if bin(grid[cy][cx]).count('1') == 3:
+                        dead_ends.append((cx, cy))
+            random.shuffle(dead_ends)
+            for cx, cy in dead_ends[:len(dead_ends) // 2]:
+                valid_moves = []
+                for move_to, (mx, my, br_wall) in self.MOVES.items():
+                    nx, ny = cx + mx, cy + my
+                    if (0 < nx < self.width - 1 and 0 < ny < self.height - 1
+                            and (nx, ny) not in self.pattern_42):
+                        if grid[cy][cx] & move_to:
+                            valid_moves.append((nx, ny, move_to, br_wall))
+                if valid_moves:
+                    nx, ny, move_to, br_wall = random.choice(valid_moves)
+                    grid[cy][cx] &= ~move_to
+                    grid[ny][nx] &= ~br_wall
+
+                    if animate:
+                        self.draw_animation_frame()
         return grid

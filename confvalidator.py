@@ -1,8 +1,4 @@
-import invenvcheck as inv
 from sys import exit, stderr
-
-
-__all__ = ["inv"]
 
 
 def validate() -> dict[str, str]:
@@ -28,7 +24,7 @@ def validate() -> dict[str, str]:
                                  " Value must seperated with '='")
             k = i.split("=")
             my_dcit.update({k[0].strip(): (k[1].strip())})
-        if not list(my_dcit.keys()) == valid_cases:
+        if set(my_dcit.keys()) != set(valid_cases):
             raise ValueError("Invalid Config: Config must "
                              "be have all valid keys")
         return my_dcit
@@ -36,9 +32,9 @@ def validate() -> dict[str, str]:
         raise ValueError(e)
 
 
-def filldict() -> dict[str, int | str | None | tuple[int, int]]:
+def filldict() -> dict[str, int | str | None | tuple[int, int] | bool]:
     conf: dict[str, str] = {}
-    confer: dict[str, int | str | None | tuple[int, int]] = {}
+    confer: dict[str, int | str | None | tuple[int, int] | bool] = {}
     try:
         conf = validate()
         confer['WIDTH'] = int(conf["WIDTH"])
@@ -47,16 +43,21 @@ def filldict() -> dict[str, int | str | None | tuple[int, int]]:
         confer['ENTRY'] = int(my_list[0]), int(my_list[1])
         my_list2: list[str] = str(conf['EXIT']).split(',')
         confer['EXIT'] = int(my_list2[0]), int(my_list2[1])
-        confer['PERFECT'] = bool(conf['PERFECT'])
-        if conf['SEED'] in "None":
+        if conf['PERFECT'] == 'True':
+            confer['PERFECT'] = True
+        elif conf['PERFECT'] == 'False':
+            confer['PERFECT'] = False
+        else:
+            raise ValueError("Invalid Config: PERFECT must be True or False")
+        if conf['SEED'] == 'None':
             confer['SEED'] = None
         else:
             confer['SEED'] = int(conf['SEED'])
         confer["OUTPUT_FILE"] = conf["OUTPUT_FILE"]
     except ValueError as e:
         print(e, file=stderr)
-        exit()
+        exit(1)
     except OSError as e:
         print(e, file=stderr)
-        exit()
+        exit(1)
     return confer

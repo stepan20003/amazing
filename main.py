@@ -7,14 +7,13 @@ from sys import stderr, exit
 
 def main() -> None:
     try:
-        drow = DrowMaze(filldict())
-        mazewrite(drow.maze, drow.road)
+        conf = filldict()
+        drow = DrowMaze(conf)
+        mazewrite(drow.maze, drow.road, conf)
         print(drow.build_terminal_map())
     except MazeError as e:
         print(e, file=stderr)
-        exit()
-    except Exception as e:
-        print(e)
+        exit(1)
 
 
 if __name__ == "__main__":
