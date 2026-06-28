@@ -58,9 +58,7 @@ class MazeGen:
                         self.visited.add((mazx, mazy))
                         self.pattern_42.add((mazx, mazy))
         else:
-            raise MazeError()
-        if self.entry in list(self.visited) or self.exit in list(self.visited):
-            raise MazeError("Entry or Exit points in 42 patern")
+            print("Entry or Exit points in 42 patern")
 
     def start_animation(self) -> None:
         pass
@@ -122,19 +120,19 @@ class MazeGen:
         return self.grid
 
     def prim_generate(self) -> list[list[int]]:
+        if self.seed is not None:
+            random.seed(self.seed)
         start_x, start_y = self.entry
-
         visited = {(start_x, start_y)}
-        frontiers = []
+        fron = []
         for move_to, (mx, my, br_wall) in self.MOVES.items():
             nx, ny = start_x + mx, start_y + my
-            if (0 < nx < self.width - 1 and 0 < ny < self.height - 1
+            if (0 <= nx <= self.width - 1 and 0 <= ny <= self.height - 1
                     and (nx, ny) not in self.pattern_42):
-                frontiers.append((nx, ny))
-
-        while frontiers:
-            idx = random.randint(0, len(frontiers) - 1)
-            cx, cy = frontiers.pop(idx)
+                fron.append((nx, ny))
+        while fron:
+            idx = random.randint(0, len(fron) - 1)
+            cx, cy = fron.pop(idx)
             if (cx, cy) in visited:
                 continue
             connected = []
@@ -150,8 +148,9 @@ class MazeGen:
                 self.draw_animation_frame()
                 for _, (nmx, nmy, _) in self.MOVES.items():
                     nnx, nny = cx + nmx, cy + nmy
-                    if (0 < nnx < self.width - 1 and 0 < nny < self.height - 1
+                    if (0 <= nnx <= self.width - 1
+                        and 0 <= nny <= self.height - 1
                             and (nnx, nny) not in self.pattern_42
                             and (nnx, nny) not in visited):
-                        frontiers.append((nnx, nny))
+                        fron.append((nnx, nny))
         return self.grid

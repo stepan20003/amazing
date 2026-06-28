@@ -1,7 +1,7 @@
 # Configuration file for A-Maze-ing project
 # Maze dimensions
-WIDTH=10
-HEIGHT=10
+WIDTH=4
+HEIGHT=2
 
 # Entry and Exit points
 ENTRY=0,0
@@ -13,5 +13,5 @@ PERFECT=True
 
 
 # Optional: Seed for reproducibility
-SEED=None
+SEED=100
 ALGORITM=prim

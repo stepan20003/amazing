@@ -2,7 +2,6 @@ PYTHON = python3
 MAIN_SCRIPT = main.py
 CONFIG_FILE = config.txt
 
-.PHONY: all install run debug clean lint lint-strict
 
 all: run
 
@@ -26,3 +25,5 @@ lint:
 lint-strict:
 	flake8 .
 	mypy --strict .
+
+.PHONY: all install run debug clean lint lint-strict

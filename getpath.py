@@ -9,7 +9,7 @@ class PathFinder(MazeGen):
         if conf['ALGORITM'] == 'dfs':
             self.maze = super().DFS_mazegen()
         else:
-            self.maze = self.prim_generate()
+            self.maze = super().prim_generate()
 
     def find_short_path(self) -> list[tuple[int, int]]:
         entry_room = (self.entry[1], self.entry[0])
