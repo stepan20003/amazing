@@ -1,7 +1,6 @@
 import sys
 import time
 from typing import Any
-
 from getpath import PathFinder
 
 

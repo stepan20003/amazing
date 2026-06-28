@@ -121,10 +121,8 @@ class MazeGen:
                         self.draw_animation_frame()
         return self.grid
 
-    def prim_generate(self) -> None:
-        start_x, start_y = 1, 1
-        if (start_x, start_y) in self.pattern_42:
-            start_x, start_y = 2, 1
+    def prim_generate(self) -> list[list[int]]:
+        start_x, start_y = self.entry
 
         visited = {(start_x, start_y)}
         frontiers = []
@@ -156,3 +154,4 @@ class MazeGen:
                             and (nnx, nny) not in self.pattern_42
                             and (nnx, nny) not in visited):
                         frontiers.append((nnx, nny))
+        return self.grid
