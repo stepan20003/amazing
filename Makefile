@@ -1,4 +1,4 @@
-PYTHON = py
+PYTHON = python3
 MAIN_SCRIPT = main.py
 CONFIG_FILE = config.txt
 

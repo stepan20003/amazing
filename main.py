@@ -1,4 +1,5 @@
 import sys
+import time
 from mazemaze import MazeError
 from drowed import DrowMaze
 from writefile import mazewrite
@@ -8,12 +9,46 @@ from sys import stderr, exit
 
 def main() -> None:
     try:
+        sys.stdout.write("\033[H\033[2J")
+        sys.stdout.flush()
         conf = filldict()
+        if "color_index" not in conf:
+            conf["color_index"] = 0
         drow = DrowMaze(conf)
         mazewrite(drow.maze, drow.road, conf)
-        if not sys.stdout.isatty():
-            print(drow.build_terminal_map())
+        show_path = True
+        while True:
+            sys.stdout.write("\033[H")
+            print(drow.build_terminal_map(show_path=show_path))
+            print("\n=== A-Maze-ing ===")
+            print("1. Re-generate a new maze")
+            print("2. Show/Hide path from entry to exit")
+            print("3. Rotate maze color")
+            print("4. Quit")
+            print("5. Choose algoritm")
+            b = input("Choice? (1-5): ")
+            if b == "1":
+                conf = filldict()
+                drow = DrowMaze(conf)
+                mazewrite(drow.maze, drow.road, conf)
+            elif b == "2":
+                show_path = not show_path
+            elif b == "3":
+                if hasattr(drow, "colors") and len(drow.colors) > 0:
+                    idx = getattr(drow, "color_index", 0)
+                    idx = (idx + 1) % len(drow.colors)
+                    drow.color_index = idx
+                    conf["color_index"] = idx
+            elif b == "4":
+                break
+            else:
+                print("\033[31mEnter correct command\033[0m")
+                time.sleep(1)
+        sys.stdout.write("\033[?1049l\033[?25h")
+        sys.stdout.flush()
     except MazeError as e:
+        sys.stdout.write("\033[?1049l\033[?25h")
+        sys.stdout.flush()
         print(e, file=stderr)
         exit(1)
 

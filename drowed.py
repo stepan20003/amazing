@@ -5,22 +5,6 @@ from typing import Any
 from getpath import PathFinder
 
 
-def _enable_terminal_vt() -> None:
-    if sys.platform != "win32":
-        return
-    try:
-        import ctypes
-        kernel32 = ctypes.windll.kernel32
-        enable_vt = 0x0004
-        for handle_id in (-11, -12):
-            handle = kernel32.GetStdHandle(handle_id)
-            mode = ctypes.c_uint32()
-            if kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
-                kernel32.SetConsoleMode(handle, mode.value | enable_vt)
-    except (AttributeError, OSError):
-        pass
-
-
 class DrowMaze(PathFinder):
     def __init__(self, conf: dict[str, Any]) -> None:
         self.road: list[tuple[int, int]] = []
@@ -35,14 +19,14 @@ class DrowMaze(PathFinder):
              "\033[41m  \033[0m", "\033[100m  \033[0m", "\033[34m██\033[0m")
         ]
         self.color_index = 2
-        self.animate = sys.stdout.isatty()
+        self.animate = 1
         self._frame_line_count = 0
-        if self.animate:
-            _enable_terminal_vt()
         super().__init__(conf)
         self.road = self.find_short_path()
         if self.animate:
             self.finish_animation(self.build_terminal_map(show_path=True))
+        else:
+            print(self.build_terminal_map(show_path=False))
 
     def find_short_path(self) -> list[tuple[int, int]]:
         path = super().find_short_path()
@@ -51,10 +35,12 @@ class DrowMaze(PathFinder):
         self.road = []
         for step in range(1, len(path) + 1):
             self.road = path[:step]
-            self.draw_path_frame()
+            if self.animate == 1:
+                self.draw_path_frame()
         return path
 
-    def _refresh_terminal(self, content: str, *, clear_screen: bool = False) -> None:
+    def _refresh_terminal(
+            self, content: str, *, clear_screen: bool = False) -> None:
         if not self.animate:
             return
         if clear_screen:
@@ -83,12 +69,22 @@ class DrowMaze(PathFinder):
         self._refresh_terminal(content, clear_screen=True)
 
     def draw_animation_frame(self, delay: float = 0.03) -> None:
-        self._refresh_terminal(self.build_terminal_map(show_path=False))
-        time.sleep(delay)
+        if self.animate == 1:
+            self._refresh_terminal(self.build_terminal_map(show_path=False))
+            time.sleep(delay)
+        else:
+            delay = 0
+            self._refresh_terminal(self.build_terminal_map(show_path=False))
+            time.sleep(delay)
 
     def draw_path_frame(self, delay: float = 0.06) -> None:
-        self._refresh_terminal(self.build_terminal_map(show_path=True))
-        time.sleep(delay)
+        if self.animate == 1:
+            self._refresh_terminal(self.build_terminal_map(show_path=True))
+            time.sleep(delay)
+        else:
+            delay = 0
+            self._refresh_terminal(self.build_terminal_map(show_path=True))
+            time.sleep(delay)
 
     def rotate_colors(self) -> None:
         self.color_index = (self.color_index + 1) % len(self.colors)
