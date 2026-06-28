@@ -6,7 +6,10 @@ from typing import Any
 class PathFinder(MazeGen):
     def __init__(self, conf: dict[Any, Any]) -> None:
         super().__init__(conf)
-        self.maze = super().mazegen()
+        if conf['ALGORITM'] == 'dfs':
+            self.maze = super().DFS_mazegen()
+        else:
+            self.maze = self.prim_generate()
 
     def find_short_path(self) -> list[tuple[int, int]]:
         entry_room = (self.entry[1], self.entry[0])

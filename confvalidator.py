@@ -10,7 +10,8 @@ def validate() -> dict[str, str]:
                               'EXIT',
                               'OUTPUT_FILE',
                               'PERFECT',
-                              'SEED']
+                              'SEED',
+                              'ALGORITM']
 
     with open("config.txt", "r") as config:
         text = [x for x in config.read().split("\n")]
@@ -26,7 +27,7 @@ def validate() -> dict[str, str]:
             my_dcit.update({k[0].strip(): (k[1].strip())})
         if set(my_dcit.keys()) != set(valid_cases):
             raise ValueError("Invalid Config: Config must "
-                             "be have all valid keys")
+                             "have all valid keys")
         return my_dcit
     except ValueError as e:
         raise ValueError(e)
@@ -70,6 +71,14 @@ def filldict() -> dict[str, int | str | None | tuple[int, int] | bool]:
         else:
             confer['SEED'] = int(conf['SEED'])
         confer["OUTPUT_FILE"] = conf["OUTPUT_FILE"]
+        conf['ALGORITM'] = conf['ALGORITM'].lower()
+        if conf["ALGORITM"] == "prim":
+            confer["ALGORITM"] = conf['ALGORITM']
+        elif conf["ALGORITM"] == "dfs":
+            confer['ALGORITM'] = conf['ALGORITM']
+        else:
+            raise ValueError("ALGORITM value must be only PRIM or DFS upper or"
+                             "lower doesnt metter")
     except ValueError as e:
         print(e, file=stderr)
         exit(1)

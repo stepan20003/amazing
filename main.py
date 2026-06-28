@@ -1,14 +1,16 @@
 import sys
-import time
+import os
 from mazemaze import MazeError
 from drowed import DrowMaze
 from writefile import mazewrite
 from confvalidator import filldict
 from sys import stderr, exit
+import time
 
 
 def main() -> None:
     try:
+        os.system("clear")
         sys.stdout.write("\033[H\033[2J")
         sys.stdout.flush()
         conf = filldict()
@@ -25,12 +27,12 @@ def main() -> None:
             print("2. Show/Hide path from entry to exit")
             print("3. Rotate maze color")
             print("4. Quit")
-            print("5. Choose algoritm")
-            b = input("Choice? (1-5): ")
+            b = input("Choice (1-5): ")
             if b == "1":
                 conf = filldict()
                 drow = DrowMaze(conf)
                 mazewrite(drow.maze, drow.road, conf)
+                os.system("clear")
             elif b == "2":
                 show_path = not show_path
             elif b == "3":
@@ -43,9 +45,9 @@ def main() -> None:
                 break
             else:
                 print("\033[31mEnter correct command\033[0m")
-                time.sleep(1)
-        sys.stdout.write("\033[?1049l\033[?25h")
-        sys.stdout.flush()
+                time.sleep(0.3)
+                sys.stdout.write("\033[2J")
+                sys.stdout.flush()
     except MazeError as e:
         sys.stdout.write("\033[?1049l\033[?25h")
         sys.stdout.flush()
