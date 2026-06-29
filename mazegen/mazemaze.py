@@ -15,8 +15,44 @@ class MazeError(Exception):
 
 
 class MazeGen:
+    """
+    Maze generator supporting DFS and Prim-based algorithms.
+
+    This class generates a 2D maze using randomized graph traversal
+    techniques. It supports both perfect and non-perfect maze generation,
+    entry/exit constraints, and optional visual animation.
+
+    The maze is represented as a grid of bitmasks, where each cell encodes
+    its wall configuration (N, E, S, W).
+
+    Attributes:
+        width (int): Maze width in cells.
+        height (int): Maze height in cells.
+        entry (tuple[int, int]): Starting cell coordinates.
+        exit (tuple[int, int]): Exit cell coordinates.
+        seed (int | None): Random seed for reproducibility.
+        grid (list[list[int]]): Internal maze representation.
+        visited (set): Set of visited cells.
+        pattern_42 (set): Cells reserved for the "42" pattern.
+
+    Supported algorithms:
+        - DFS recursive backtracking
+        - Prim's randomized algorithm
+    """
     def __init__(
             self, conf: dict[Any, Any]) -> None:
+        """
+            Initializes the maze generator from configuration dictionary.
+
+            The configuration must contain WIDTH, HEIGHT, ENTRY, EXIT,
+            and optionally SEED and PERFECT flags.
+
+            Args:
+                conf (dict[Any, Any]): Configuration dictionary.
+
+            Raises:
+                MazeError: If entry or exit overlaps with the 42 pattern area.
+            """
         self.conf = conf
         self.NORTH = 1
         self.EAST = 2
@@ -49,7 +85,7 @@ class MazeGen:
         self.pattern_42 = set()
         start_pat_x = (self.width - 7) // 2
         start_pat_y = (self.height - 5) // 2
-        if self.width >= 7 and self.height >= 5:
+        if self.width >= 8 and self.height >= 6:
             for py in range(5):
                 for px in range(7):
                     if self.PAT42[py][px] == 1:
@@ -57,8 +93,14 @@ class MazeGen:
                         mazy = start_pat_y + py
                         self.visited.add((mazx, mazy))
                         self.pattern_42.add((mazx, mazy))
+        vc, sc = self.exit
+        ks, nc = self.entry
+        if (vc, sc) in self.visited:
+            raise MazeError("Error: EXIT point on 42 patern")
+        elif (ks, nc) in self.visited:
+            raise MazeError("Error: ENTRY point on 42 patern")
         else:
-            print("Entry or Exit points in 42 patern")
+            pass
 
     def start_animation(self) -> None:
         pass
@@ -67,6 +109,16 @@ class MazeGen:
         pass
 
     def DFS_mazegen(self) -> list[list[int]]:
+        """
+        Generates a maze using Depth-First Search (recursive backtracking).
+
+        The algorithm explores unvisited neighbors using a stack and removes
+        walls between connected cells. After generation, optional loop removal
+        is applied if PERFECT mode is disabled.
+
+        Returns:
+            list[list[int]]: Generated maze grid encoded as bitmasks.
+        """
         stack: list[tuple[int, int]] = []
         animate = sys.stdout.isatty()
         if animate:
@@ -120,6 +172,16 @@ class MazeGen:
         return self.grid
 
     def prim_generate(self) -> list[list[int]]:
+        """
+    Generates a maze using randomized Prim's algorithm.
+
+    The algorithm grows a spanning tree by selecting random frontier cells
+    and connecting them to the existing maze structure. If PERFECT mode
+    is disabled, additional random wall removals introduce loops.
+
+    Returns:
+        list[list[int]]: Generated maze grid encoded as bitmasks.
+    """
         if self.seed is not None:
             random.seed(self.seed)
         start_x, start_y = self.entry
@@ -155,18 +217,21 @@ class MazeGen:
                         fron.append((nnx, nny))
 
             if not self.conf["PERFECT"]:
-                removal_chance = 0.07
+                removal_chance = 0.00001
                 for cy in range(self.height):
                     for cx in range(self.width):
                         if (cx, cy) in self.pattern_42:
                             continue
                         for move_to, (mx, my, br_wall) in self.MOVES.items():
                             nx, ny = cx + mx, cy + my
-                            if (0 <= nx < self.width and 0 <= ny < self.height
-                                    and (nx, ny) not in self.pattern_42):
-                                if ((self.grid[cy][cx] & move_to)
-                                    and random.random() < removal_chance):
-                                    self.grid[cy][cx] &= ~move_to
-                                    self.grid[ny][nx] &= ~br_wall
+                            if not (0 <= nx < self.width and
+                                    0 <= ny < self.height):
+                                continue
+                            if (nx, ny) in self.pattern_42:
+                                continue
+                            if ((self.grid[cy][cx] & move_to) and
+                                    random.random() < removal_chance):
+                                self.grid[cy][cx] &= ~move_to
+                                self.grid[ny][nx] &= ~br_wall
                 self.draw_animation_frame()
         return self.grid

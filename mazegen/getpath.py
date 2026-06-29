@@ -1,9 +1,23 @@
 from collections import deque
-from mazemaze import MazeGen, MazeError
+from mazegen.mazemaze import MazeGen, MazeError
 from typing import Any
 
 
 class PathFinder(MazeGen):
+    """
+Maze solver and algorithm selector built on top of MazeGen.
+
+This class extends MazeGen and is responsible for generating the maze
+using the selected algorithm (DFS or Prim), and computing the shortest
+path between entry and exit using Breadth-First Search (BFS).
+
+It acts as a bridge between maze generation and pathfinding logic.
+
+Attributes:
+    maze (list[list[int]]): Generated maze grid.
+    entry (tuple[int, int]): Entry coordinates.
+    exit (tuple[int, int]): Exit coordinates.
+"""
     def __init__(self, conf: dict[Any, Any]) -> None:
         super().__init__(conf)
         if conf['ALGORITM'] == 'dfs':
@@ -12,6 +26,19 @@ class PathFinder(MazeGen):
             self.maze = super().prim_generate()
 
     def find_short_path(self) -> list[tuple[int, int]]:
+        """
+Finds the shortest path between entry and exit using BFS.
+
+The algorithm performs a breadth-first search over the maze grid,
+respecting wall constraints encoded in each cell using bitmasks.
+It reconstructs the shortest path using a parent-pointer dictionary.
+
+Returns:
+    list[tuple[int, int]]: Shortest path from entry to exit.
+
+Raises:
+    MazeError: If no valid path exists between entry and exit.
+"""
         entry_room = (self.entry[1], self.entry[0])
         exit_room = (self.exit[1], self.exit[0])
         queue: deque[tuple[int, int]] = deque([entry_room])

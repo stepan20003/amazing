@@ -2,6 +2,25 @@ from sys import exit, stderr
 
 
 def validate() -> dict[str, str]:
+    """
+Reads and validates the configuration file.
+
+The function opens 'config.txt', removes comments and empty lines,
+and parses key-value pairs separated by '='. It ensures that all
+required configuration keys are present and valid.
+
+Expected keys:
+    WIDTH, HEIGHT, ENTRY, EXIT, OUTPUT_FILE,
+    PERFECT, SEED, ALGORITM
+
+Returns:
+    dict[str, str]: Raw configuration dictionary with string values.
+
+Raises:
+    ValueError: If the configuration file contains invalid formatting
+    or missing/extra required keys.
+    OSError: If the configuration file cannot be read.
+"""
     text: list[str] = []
     my_dcit: dict[str, str] = {}
     valid_cases: list[str] = ['WIDTH',
@@ -34,6 +53,23 @@ def validate() -> dict[str, str]:
 
 
 def filldict() -> dict[str, int | str | None | tuple[int, int] | bool]:
+    """
+Parses and converts the raw configuration into typed values.
+
+This function validates numeric constraints, converts types,
+and ensures the configuration is usable for maze generation.
+It handles conversion of WIDTH, HEIGHT, ENTRY, EXIT, SEED,
+PERFECT flag, and algorithm selection.
+
+Returns:
+    dict[str, int | str | bool | None | tuple[int, int]]:
+        Fully parsed configuration dictionary ready for maze generation.
+
+Raises:
+    ValueError: If any configuration value is invalid, out of bounds,
+    or incorrectly formatted.
+    OSError: If an error occurs during configuration reading.
+"""
     conf: dict[str, str] = {}
     confer: dict[str, int | str | None | tuple[int, int] | bool] = {}
     try:
@@ -46,6 +82,8 @@ def filldict() -> dict[str, int | str | None | tuple[int, int] | bool]:
             )
         confer['WIDTH'] = width
         confer['HEIGHT'] = height
+        if width <= 5 or height <= 5:
+            raise ValueError("ERROR: WIDTH or HEIGHT cant be less then 5")
         my_list: list[str] = str(conf['ENTRY']).split(',')
         entry = (int(my_list[0]), int(my_list[1]))
         my_list2: list[str] = str(conf['EXIT']).split(',')

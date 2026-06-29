@@ -1,10 +1,31 @@
 import sys
 import time
 from typing import Any
-from getpath import PathFinder
+from mazegen.getpath import PathFinder
 
 
 class DrowMaze(PathFinder):
+    """
+Terminal-based animated maze renderer with path visualization.
+
+This class extends PathFinder and provides an interactive terminal UI
+for displaying generated mazes. It supports colored rendering, animated
+generation, shortest path visualization, and dynamic updates.
+
+Features:
+    - ANSI terminal rendering of maze grid
+    - Animated maze solving/path drawing
+    - Multiple color themes
+    - Toggleable shortest path display
+    - Support for special "42 pattern" overlay
+
+Attributes:
+    road (list[tuple[int, int]]): Computed shortest path.
+    colors (list[tuple[str, ...]]): Available rendering color themes.
+    color_index (int): Current active color theme index.
+    animate (int): Animation mode flag (1 = enabled, 0 = disabled).
+    _frame_line_count (int): Internal tracking of rendered terminal lines.
+"""
     def __init__(self, conf: dict[str, Any]) -> None:
         self.road: list[tuple[int, int]] = []
         self.colors = [
@@ -28,6 +49,16 @@ class DrowMaze(PathFinder):
             print(self.build_terminal_map(show_path=False))
 
     def find_short_path(self) -> list[tuple[int, int]]:
+        """
+Computes and animates the shortest path in the maze.
+
+Calls the parent PathFinder implementation to compute the shortest path,
+then progressively visualizes it step-by-step in the terminal if animation
+is enabled.
+
+Returns:
+    list[tuple[int, int]]: The shortest path from entry to exit.
+"""
         path = super().find_short_path()
         if not self.animate:
             return path
@@ -40,6 +71,19 @@ class DrowMaze(PathFinder):
 
     def _refresh_terminal(
             self, content: str, *, clear_screen: bool = False) -> None:
+        """
+Updates the terminal display with new frame content.
+
+Handles cursor positioning, screen clearing, and efficient line-by-line
+redrawing for smooth animation.
+
+Args:
+    content (str): The rendered maze frame to display.
+    clear_screen (bool): Whether to clear the screen before rendering.
+
+Returns:
+    None
+"""
         if not self.animate:
             return
         if clear_screen:
@@ -53,6 +97,15 @@ class DrowMaze(PathFinder):
         sys.stdout.flush()
 
     def start_animation(self) -> None:
+        """
+Initializes terminal animation mode.
+
+Switches to an alternate terminal buffer, hides cursor,
+and prepares screen for animated rendering.
+
+Returns:
+    None
+"""
         if not self.animate:
             return
         sys.stdout.write("\033[?1049h\033[?25l\033[2J\033[H")
@@ -60,6 +113,18 @@ class DrowMaze(PathFinder):
         self._frame_line_count = 0
 
     def finish_animation(self, content: str) -> None:
+        """
+Terminates animation mode and restores terminal state.
+
+Restores normal terminal buffer and cursor visibility, then
+renders the final maze frame.
+
+Args:
+    content (str): Final frame to display.
+
+Returns:
+    None
+"""
         if not self.animate:
             return
         sys.stdout.write("\033[?1049l\033[?25h")
@@ -68,6 +133,18 @@ class DrowMaze(PathFinder):
         self._refresh_terminal(content, clear_screen=True)
 
     def draw_animation_frame(self, delay: float = 0.03) -> None:
+        """
+Renders a single frame of maze generation animation.
+
+Displays the current maze state without the solution path,
+optionally delaying execution for visualization.
+
+Args:
+    delay (float): Time delay between frames in seconds.
+
+Returns:
+    None
+"""
         if self.animate == 1:
             self._refresh_terminal(self.build_terminal_map(show_path=False))
             time.sleep(delay)
@@ -77,6 +154,18 @@ class DrowMaze(PathFinder):
             time.sleep(delay)
 
     def draw_path_frame(self, delay: float = 0.06) -> None:
+        """
+Renders a single frame of shortest path animation.
+
+Displays the maze with the currently revealed path step,
+used to animate path discovery.
+
+Args:
+    delay (float): Time delay between frames in seconds.
+
+Returns:
+    None
+"""
         if self.animate == 1:
             self._refresh_terminal(self.build_terminal_map(show_path=True))
             time.sleep(delay)
@@ -86,9 +175,30 @@ class DrowMaze(PathFinder):
             time.sleep(delay)
 
     def rotate_colors(self) -> None:
+        """
+Cycles to the next available color theme.
+
+Updates the active terminal rendering palette used for maze display.
+
+Returns:
+    None
+"""
         self.color_index = (self.color_index + 1) % len(self.colors)
 
     def build_terminal_map(self, show_path: bool = True) -> str:
+        """
+Builds a full ASCII/ANSI representation of the maze for terminal display.
+
+Converts the internal maze grid into a colored 2D terminal representation,
+including walls, entry/exit points, shortest path (optional), and
+special "42 pattern" visualization.
+
+Args:
+    show_path (bool): Whether to display the shortest path.
+
+Returns:
+    str: Fully rendered terminal string representation of the maze.
+"""
         h = self.height
         w = self.width
         grid = self.maze

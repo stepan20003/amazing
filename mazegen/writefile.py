@@ -7,6 +7,33 @@ def mazewrite(
     mazepath: list[tuple[int, int]],
     conf: dict[str, Any],
 ) -> None:
+    """
+Writes the generated maze and solution path to an output file.
+
+The function exports the maze grid using hexadecimal encoding,
+followed by entry and exit coordinates, and finally the shortest
+path encoded as directional characters (N, E, S, W).
+
+File format:
+    1. Maze grid (hex values per cell, row by row)
+    2. Empty line
+    3. Entry coordinates
+    4. Exit coordinates
+    5. Path as sequence of directions
+
+Args:
+    maze (list[list[int]]): 2D grid representing maze walls.
+    mazepath (list[tuple[int, int]]): Shortest path from entry to exit.
+    conf (dict[str, Any]): Configuration dictionary containing output file name
+        and entry/exit coordinates.
+
+Returns:
+    None
+
+Raises:
+    OSError: If the output file cannot be created or written.
+"""
+
     outputf = conf["OUTPUT_FILE"]
     direct = {
         'N': (-1, 0),

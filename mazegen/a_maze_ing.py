@@ -1,14 +1,26 @@
 import sys
 import os
-from mazemaze import MazeError
-from drowed import DrowMaze
-from writefile import mazewrite
-from confvalidator import filldict
+from mazegen.mazemaze import MazeError
+from mazegen.drowed import DrowMaze
+from mazegen.writefile import mazewrite
+from mazegen.confvalidator import filldict
 from sys import stderr, exit
 import time
 
 
 def main() -> None:
+    """
+    Entry point of the A-Maze-ing program.
+
+    Responsibilities:
+        - Load configuration
+        - Generate maze
+        - Start interactive terminal UI
+        - Handle user input (regen, toggle path, colors, exit)
+
+    Raises:
+        MazeError: If maze generation or validation fails.
+    """
     try:
         os.system("clear")
         sys.stdout.write("\033[H\033[2J")
@@ -29,7 +41,10 @@ def main() -> None:
             print("2. Show/Hide path from entry to exit")
             print("3. Rotate maze color")
             print("4. Quit")
-            b = input("Choice (1-5): ")
+            if drow.width < 8 or drow.height < 6:
+                print("Error: Maze size too small to fit the '42' "
+                      "pattern. Minimum size is 8x6.")
+            b = input("Choice (1-4): ")
             if b == "1":
                 conf = filldict()
                 drow = DrowMaze(conf)
@@ -51,6 +66,7 @@ def main() -> None:
                 sys.stdout.write("\033[2J")
                 sys.stdout.flush()
     except MazeError as e:
+        os.system("clear")
         sys.stdout.write("\033[?1049l\033[?25h")
         sys.stdout.flush()
         print(e, file=stderr)
