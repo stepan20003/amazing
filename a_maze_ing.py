@@ -19,8 +19,10 @@ def main() -> None:
         drow = DrowMaze(conf)
         mazewrite(drow.maze, drow.road, conf)
         show_path = True
+        os.system("clear")
         while True:
             sys.stdout.write("\033[H")
+            sys.stdout.flush()
             print(drow.build_terminal_map(show_path=show_path))
             print("\n=== A-Maze-ing ===")
             print("1. Re-generate a new maze")

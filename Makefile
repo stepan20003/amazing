@@ -1,29 +1,32 @@
-PYTHON = python3
-MAIN_SCRIPT = main.py
+PYTHON = poetry run python3
+MAIN_SCRIPT = a_maze_ing.py
 CONFIG_FILE = config.txt
 
+.PHONY: install run debug clean lint lint-strict build
 
-all: run
+install:
+	poetry install
 
 run:
-	$(PYTHON) $(MAIN_SCRIPT)
+	$(PYTHON) $(MAIN_SCRIPT) $(CONFIG_FILE)
 
 debug:
-	$(PYTHON) -m pdb $(MAIN_SCRIPT) $(CONFIG_FILE)
+	poetry run python3 -m pdb $(MAIN_SCRIPT) $(CONFIG_FILE)
 
 clean:
-	rm -rf .mypy_cache
-	rm -rf .pytest_cache
+	rm -rf __pycache__ .pytest_cache .mypy_cache dist
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	find . -type f -name "*.pyo" -delete
 
 lint:
-	flake8 .
-	mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs .
+	poetry run flake8 .
+	poetry run mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs .
 
 lint-strict:
-	flake8 .
-	mypy --strict .
+	poetry run flake8 .
+	poetry run mypy --strict .
 
-.PHONY: all install run debug clean lint lint-strict
+build:
+	poetry build
+	cp dist/mazegen-1.0.0* .

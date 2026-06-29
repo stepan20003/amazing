@@ -153,4 +153,20 @@ class MazeGen:
                             and (nnx, nny) not in self.pattern_42
                             and (nnx, nny) not in visited):
                         fron.append((nnx, nny))
+
+            if not self.conf["PERFECT"]:
+                removal_chance = 0.07
+                for cy in range(self.height):
+                    for cx in range(self.width):
+                        if (cx, cy) in self.pattern_42:
+                            continue
+                        for move_to, (mx, my, br_wall) in self.MOVES.items():
+                            nx, ny = cx + mx, cy + my
+                            if (0 <= nx < self.width and 0 <= ny < self.height
+                                    and (nx, ny) not in self.pattern_42):
+                                if ((self.grid[cy][cx] & move_to)
+                                    and random.random() < removal_chance):
+                                    self.grid[cy][cx] &= ~move_to
+                                    self.grid[ny][nx] &= ~br_wall
+                self.draw_animation_frame()
         return self.grid

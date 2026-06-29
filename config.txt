@@ -13,5 +13,5 @@ PERFECT=True
 
 
 # Optional: Seed for reproducibility
-SEED=100
-ALGORITM=prim
+SEED=None
+ALGORITM=dfs
