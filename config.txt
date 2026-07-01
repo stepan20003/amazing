@@ -1,12 +1,11 @@
 # Configuration file for A-Maze-ing project
 # Maze dimensions
 WIDTH=15
-HEIGHT=13
+HEIGHT=20
 
 # Entry and Exit points
-ENTRY=0,0
-EXIT=10,0
-
+ENTRY=2,0
+EXIT=14,19
 # Output settings
 OUTPUT_FILE=maze.txt
 PERFECT=True
@@ -14,3 +13,4 @@ PERFECT=True
 
 # Optional: Seed for reproducibility
 SEED=None
+ALGORITM=dfs
